@@ -1,89 +1,80 @@
-#include <hashmap.h>
+#include "hashmap.h"
 
-namespace CODES
+using namespace CODE;
+
+Hashmap::Hashmap()
 {
-	Hashmap::Hashmap()
-	{
-		hashArray = new HashElement<TYPE1,TYPE2>[HASHSIZE];
-		numOfElem = 0;
-	}
-	Hashmap::Hashmap(HashElement<TYPE1,TYPE2> e)
-	{
-		Hashmap();
-		AddElem(e);
-		numOfElem++;
-		e.next = null;
-	}
-	public int Hashmap::AddElem(HashElement<TYPE1,TYPE2> e)
-	{
-		int loc = 0;
-		while(loc < numOfElem && e.first >= hashArray[loc].first)
-		{
-			loc++;
-		}
-		if(loc != 0 && hashArray[loc].first == e.first)
-			hashArray[loc].second = e.second;
-		else
-			AddElem(e, loc);
-	}
+	length = capacity;
+	kcount = 0; 
+	ecount = 0;
+	elements.resize(length);
+}
 
-	public void Hashmap::AddElem(HashElement<TYPE1,TYPE2> e, int loc)
-	{
-		if(loc == 0)
-		{
-			e.next = null;
-			hashArray.next = e;
-		}			
-		else if(loc < numOfElem)
-		{
-			e.next = hashArray[loc];
-			hashArray[loc] = e;
-		}
-		else
-		{
-			if(loc >= HASHSIZE)
-			{
-				loc = HASHSIZE;
-				ReHash();
-			}			
-			e.next = null;
-			hashArray[loc].next = e;
-		}
-		numOfElem++;
-	}
+Hashmap::Hashmap(KEY k, VALUE v)
+{
+	Hashmap();
+	Element* e = new Element;
+	int idx = GetHashIndex(*e);
+	elements[idx] = e;
+}
 
-	public void Hashmap::ReHash()
-	{
-		HashElement<TYPE1,TYPE2>[] OHashArray = new HashElement<TYPE1,TYPE2>[](hashArray);
-		hashArray = new HashElement<TYPE1,TYPE2>[HASHSIZE*2];
-		for(int i = 0; i < HASHSIZE; ++i)
-			hashArray[i] = OHashArray[i];
-		HASHSIZE *= 2; 
-	}
+Element* Hashmap::InitElement(KEY k, VALUE v)
+{
+	Element* e = new Element;
+	e->key = k;
+	e->value = v;
+	e->next = new struct Element;
+	return e;
+}
 
-	public void Hashmap::RemoveElem(int idx)
-	{
-		HashElement<TYPE1,TYPE2> *head = hashArray;	
-		while(head->first != idx)
-			head++;
-		if(head != null)
-		{
-			HashElement<TYPE1,TYPE2> *data = head->next;
-			head->next = head->next->next;
-			delete data;
-		}		
-	}
+int Hashmap::GetHashIndex(Element e)
+{
+	// hash function
+	return (e.key * 11 + (int)e.value.length() % 11) % length;
+}
 
-	public void Hashmap::RemoveElem(HashElement<TYPE1, TYPE2> e)
+int Hashmap::AddElement(KEY k, VALUE v)
+{
+	Element* e = InitElement(k, v);
+	int idx = GetHashIndex(*e);
+	if(elements[idx] == NULL) // the element is empty
 	{
-		HashElement<TYPE1,TYPE2> *head = hashArray;	
-		while(head->first != e.first)
-			head++;
-		if(head != null)
-		{
-			HashElement<TYPE1,TYPE2> *data = head->next;
-			head->next = head->next->next;
-			delete data;
-		}		
+		elements[idx] = e;
+		kcount++;
+		ecount++;
+		return idx;
 	}
+	// find the last location of the linked list
+	Element* enext = elements[idx];
+	while (enext->next != NULL && enext->key != e->key)
+		enext = enext->next;
+	if (enext->key == e->key)
+	{
+		enext->value = v;
+	}
+	else
+	{
+		enext->next = e;
+		ecount++;
+	}
+	return idx;
+}
+
+int Hashmap::RemoveElement(KEY k, VALUE v)
+{
+	Element* e = InitElement(k,v);
+	int idx = GetHashIndex(*e);
+	if(elements[idx] == NULL) 
+		return -1; // not found
+	if (elements[idx]->key == k)
+		return idx;
+	Element* enext = elements[idx];
+	while (enext->next != NULL && enext->next->key != e->key)
+		enext = enext->next;
+	if(enext == NULL)
+		return -1;
+	e = enext->next;
+	e->next = e->next->next;
+	return e->key;
+	delete e;
 }

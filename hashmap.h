@@ -1,50 +1,61 @@
-namespace CODES
+//#ifndef HASHMAP_H
+//#define HASHMAP_H
+
+#include <stdio.h>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+namespace CODE
 {
-	template<class TYPE1, class TYPE2> 
-	class HashElement
+	#define KEY int
+	#define VALUE string
+
+	int capacity = 1000;
+
+	//class Element
+	//{
+	//public:
+	//	KEY key;
+	//	VALUE value;
+	//	Element next;
+	//	
+	//public:
+	//	Element(KEY k, VALUE V)
+	//	{
+	//		key = k;
+	//		value = v;
+	//		next = NULL;
+	//	};
+	//};
+
+	struct Element
 	{
-		private TYPE1 key;
-		private TYPE2 value;
-		public HashElement(TYPE1 k, TYPE2 v)
-		{
-			key = k;
-			value = v;
-		}
-		public TYPE2 GetValue(TYPE1 k)
-		{
-			return value;
-		}
-		public void SetValue(TYPE2 v)
-		{
-			value = v;
-		}
+		KEY key;
+		VALUE value;
+		struct Element *next;
 	};
 
-	template<class TYPE1, class TYPE2> 
-	struct HashElement
-	{
-		TYPE1 key;
-		TYPE2 value;
-		struct HashElement *next;
-	};
-
-	int HASHSIZE = 1000;
-
-	template<class TYPE1, class TYPE2> 
 	class Hashmap
 	{
 	public:
-		int numOfElem; // real number of pairs <key, value>
-		HashElement<TYPE1,TYPE2> *hashArray = null;
+		vector<Element*> elements; // entries
+		int length; // length of hash table
+		int ecount; // number of elements
+		int kcount; // number of occupied keys
+		
 	public:
 		Hashmap();
-		Hashmap(HashElement<TYPE1,TYPE2> e);
-		~Hashmap();
-	public:
-		int AddElem(HashElement<TYPE1,TYPE2> e);
-		void AddElem(HashElement<TYPE1,TYPE2> e, int loc);
-		void RemoveElem(int idx);
-		void RemoveElem(HashElement<TYPE1, TYPE2> e);
-		void ReHashp();
+		Hashmap(KEY k, VALUE v);
+		Element* InitElement(KEY k, VALUE v);
+		int GetHashIndex(Element e); // hash function
+		int AddElement(KEY k, VALUE v);
+		int RemoveElement(KEY k, VALUE v);
+		Element NextKeyElement(); // next element in the table
+		int ElemCount() { return ecount; }; 
+		int KeyCount() { return kcount; }; 
 	};
 }
+
+//#endif
