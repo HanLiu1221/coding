@@ -69,10 +69,18 @@ int Hashmap::AddElement(KEY k, VALUE v)
 		return idx;
 	}
 	
-	// insert at the beginning as long as order does not matter
-	Element* eidx = elements[idx];
-	elements[idx] = e;
-	e->next = eidx;
+	Element* enext = elements[idx];
+	while (enext->next != NULL && enext->key != e->key)
+		enext = enext->next;
+	if (enext->key == e->key)
+	{
+		enext->value = v;
+	}
+	else
+	{
+		enext->next = e;
+		ecount++;
+	}
 	return idx;
 }
 
